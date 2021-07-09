@@ -1,5 +1,6 @@
 import React from 'react';
 import HomePageAPI from '../api/HomePageAPI';
+import {DebaterTableSearch} from "./DebaterTableSearch";
 
 class App extends React.Component {
 
@@ -10,12 +11,39 @@ class App extends React.Component {
         season: 0,
         rankings: [],
         seasons: [],
+        selectedPage: 1,
+        selectedIndex: 0,
+        showTableSearchResults: false,
     };
 
+    constructor(props) {
+        super(props);
+
+        this.refDebaterTableSearch = React.createRef()
+
+        this.clickHandlerDebaterTableSearch = this.clickHandlerDebaterTableSearch.bind(this)
+        this.gotoTableEntry = this.gotoTableEntry.bind(this)
+    }
+
     componentDidMount() {
+        console.log(this.refDebaterTableSearch)
+        document.addEventListener('mousedown', this.clickHandlerDebaterTableSearch)
+
         this.updatePageLength('CX', 2020)
         this.updateRankings(0, 'CX', 2020)
         this.getSeasons()
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('mousedown', this.clickHandlerDebaterTableSearch)
+    }
+
+    clickHandlerDebaterTableSearch(event) {
+        if (this.refDebaterTableSearch && !this.refDebaterTableSearch.current.contains(event.target)) {
+            this.setState({showTableSearchResults: false})
+        } else {
+            this.setState({showTableSearchResults: true})
+        }
     }
 
     updatePageLength(event, season) {
@@ -83,6 +111,24 @@ class App extends React.Component {
         this.updateRankings(page, this.state.event, this.state.season)
     }
 
+    ///////////////
+    // Callbacks //
+    ///////////////
+
+    gotoTableEntry(page, index) {
+        this.setState({
+            selectedPage: page,
+            selectedIndex: index,
+        })
+
+        if(page !== -1)
+            this.updatePage(page)
+    }
+
+    ////////////
+    // Render //
+    ////////////
+
     render() {
         return (
             <div className="container">
@@ -114,10 +160,10 @@ class App extends React.Component {
                                 }>ALL</a>
                                 {
                                     this.state.seasons.map(season => {
-                                        return <a className="dropdown-item" onClick={e => {
-                                                        this.updateSeason(e.target.innerHTML)
-                                                    }
-                                                }>{season}</a>
+                                        return <a
+                                            className="dropdown-item"
+                                            onClick={e => {this.updateSeason(e.target.innerHTML)}}
+                                        >{season}</a>
                                     })
                                 }
                             </div>
@@ -136,6 +182,7 @@ class App extends React.Component {
 
                         <div>Page {this.state.page + 1} out of {this.state.pages === 0 ? 'loading...' : this.state.pages}</div>
 
+                        <DebaterTableSearch showResults={this.state.showTableSearchResults} ref={this.refDebaterTableSearch} gotoEntryCallback={this.gotoTableEntry}/>
                     </div>
 
                     <table className="table">
@@ -152,8 +199,13 @@ class App extends React.Component {
                         </thead>
                         <tbody>
                             {
-                                this.state.rankings.map(re => { // Ranking Entry
-                                    return <tr>
+                                this.state.rankings.map((re, index) => { // Ranking Entry
+                                    return <tr style={
+                                        this.state.page === this.state.selectedPage &&
+                                            index === this.state.selectedIndex ?
+                                        {backgroundColor: '#ffff99'} :
+                                        {}
+                                    }>
                                         <th scope="row">{re.ranking}</th>
                                         <td>{re.schoolName}</td>
                                         <td>{re.debaterName}</td>
