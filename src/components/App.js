@@ -1,6 +1,7 @@
 import React from 'react';
 import HomePageAPI from '../api/HomePageAPI';
 import {DebaterTableSearch} from "./DebaterTableSearch";
+import {SchoolSearch} from "./SchoolSearch";
 
 class App extends React.Component {
 
@@ -13,18 +14,22 @@ class App extends React.Component {
         seasons: [],
         selectedPage: -1,
         selectedIndex: -1,
+        selectedSchoolID: -1
     };
 
     // Set by DebateTableSearch or TeamTableSearch component
     showTableSearchResults = (b) => {}
+    setSchoolShowResults = (b) => {}
     clearTableQuery = () => {}
+    clearSchoolTableQuery = () => {}
 
     constructor(props) {
         super(props);
 
+        this.refSchoolTableSearch = React.createRef()
         this.refDebaterTableSearch = React.createRef()
 
-        this.clickHandlerDebaterTableSearch = this.clickHandlerDebaterTableSearch.bind(this)
+        this.clickHandler = this.clickHandler.bind(this)
         this.gotoTableEntry = this.gotoTableEntry.bind(this)
     }
 
@@ -33,7 +38,7 @@ class App extends React.Component {
     ///////////////
 
     componentDidMount() {
-        document.addEventListener('mousedown', this.clickHandlerDebaterTableSearch)
+        document.addEventListener('mousedown', this.clickHandler)
 
         this.updatePageLength('CX', 2020)
         this.updateRankings(0, 'CX', 2020)
@@ -41,26 +46,37 @@ class App extends React.Component {
     }
 
     componentWillUnmount() {
-        document.removeEventListener('mousedown', this.clickHandlerDebaterTableSearch)
+        document.removeEventListener('mousedown', this.clickHandler)
     }
 
     ///////////
     // Hooks //
     ///////////
 
-    clickHandlerDebaterTableSearch(event) {
-        // Click off search
-        if (this.refDebaterTableSearch && !this.refDebaterTableSearch.current.contains(event.target)) {
+    clickHandler(event) {
+        // Click on school search
+        if(this.refSchoolTableSearch && this.refSchoolTableSearch.current.contains(event.target)) {
+            this.setSchoolShowResults(true)
             this.showTableSearchResults(false)
+        // Click on debater search
+        } else if (this.refDebaterTableSearch && this.refDebaterTableSearch.current.contains(event.target)) {
+            this.showTableSearchResults(true)
+            this.setSchoolShowResults(false)
         // Click on search
         } else {
-            this.showTableSearchResults(true)
+            this.setSchoolShowResults(false)
+            this.showTableSearchResults(false)
         }
     }
 
     ///////////////
     // Callbacks //
     ///////////////
+
+    clearQueries() {
+        this.clearSchoolTableQuery()
+        this.clearTableQuery()
+    }
 
     gotoTableEntry(page, index) {
         this.setState({
@@ -128,13 +144,13 @@ class App extends React.Component {
     }
 
     updateSeason(season) {
-        this.clearTableQuery()
+        this.clearQueries()
         this.updatePageLength(this.state.event, season)
         this.updateRankings(0, this.state.event, season)
     }
 
     updateEvent(event) {
-        this.clearTableQuery()
+        this.clearQueries()
         this.updatePageLength(event, this.state.season)
         this.updateRankings(0, event, this.state.season)
     }
@@ -204,12 +220,19 @@ class App extends React.Component {
 
                         <div>Page {this.state.page + 1} out of {this.state.pages === 0 ? 'loading...' : this.state.pages}</div>
 
-                        <DebaterTableSearch
-                            season={this.state.season}
-                            setShowResults={f => (this.showTableSearchResults = f)}
-                            clearTableQuery={f => (this.clearTableQuery = f)}
-                            ref={this.refDebaterTableSearch}
-                            gotoEntryCallback={this.gotoTableEntry}/>
+
+                        <div className="input-group mb-3">
+                            <SchoolSearch
+                                forwardRef={this.refSchoolTableSearch}
+                                clearQuery={f => this.clearSchoolTableQuery = f}
+                                setShowResults={f => (this.setSchoolShowResults = f)}/>
+                            <DebaterTableSearch
+                                season={this.state.season}
+                                setShowResults={f => (this.showTableSearchResults = f)}
+                                clearTableQuery={f => (this.clearTableQuery = f)}
+                                ref={this.refDebaterTableSearch}
+                                gotoEntryCallback={this.gotoTableEntry}/>
+                        </div>
                     </div>
 
                     <table className="table">

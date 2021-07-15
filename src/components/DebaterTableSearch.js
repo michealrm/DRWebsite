@@ -8,12 +8,21 @@ export const DebaterTableSearch = React.forwardRef((props, ref) => {
     const [showResults, setShowResults] = useState(false)
 
     props.setShowResults(setShowResults)
-    props.clearTableQuery(() => {console.log("clearing!"); setTableQuery('')})
+    props.clearTableQuery(() => {setTableQuery('')})
 
     // When query changes, set searchResult state by calling API
     useEffect(() => {
-        HomePageAPI.get('debaterTableSearch',
-            {params: {query: tableQuery, event: 'LD', season: props.season}})
+        let params = {
+            params: {
+                query: tableQuery,
+                event: 'LD'
+            }
+        }
+
+        if(props.season !== 'ALL')
+            params.params.season = props.season
+
+        HomePageAPI.get('debaterTableSearch', params)
             .then(response => {
                 setSearchResults(response.data)
             })
@@ -60,8 +69,8 @@ export const DebaterTableSearch = React.forwardRef((props, ref) => {
             }}
             value={tableQuery}
             className="form-control" type="text"
-            placeholder="Search debaters"
-            aria-label="Table Search"
+            placeholder="Search debater"
+            aria-label="Search debater"
             onKeyDown={keyHandler}
         />
 
