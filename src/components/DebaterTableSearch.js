@@ -10,6 +10,8 @@ export const DebaterTableSearch = React.forwardRef((props, ref) => {
     props.setShowResults(setShowResults)
     props.clearTableQuery(() => {setTableQuery('')})
 
+    console.log(props.schoolID)
+
     // When query changes, set searchResult state by calling API
     useEffect(() => {
         let params = {
@@ -21,6 +23,8 @@ export const DebaterTableSearch = React.forwardRef((props, ref) => {
 
         if(props.season !== 'ALL')
             params.params.season = props.season
+        if(props.schoolID !== -1)
+            params.params.school = props.schoolID
 
         HomePageAPI.get('debaterTableSearch', params)
             .then(response => {

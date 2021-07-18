@@ -73,6 +73,14 @@ class App extends React.Component {
     // Callbacks //
     ///////////////
 
+    callbackSetSchoolID(result) {
+        this.setState({selectedSchoolID: result.id})
+    }
+
+    callbackOnSchoolQueryChange() {
+        this.setState({selectedSchoolID: -1})
+    }
+
     clearQueries() {
         this.clearSchoolTableQuery()
         this.clearTableQuery()
@@ -225,9 +233,13 @@ class App extends React.Component {
                             <SchoolSearch
                                 forwardRef={this.refSchoolTableSearch}
                                 clearQuery={f => this.clearSchoolTableQuery = f}
-                                setShowResults={f => (this.setSchoolShowResults = f)}/>
+                                setShowResults={f => (this.setSchoolShowResults = f)}
+                                onSelectedResult={f => (this.callbackSetSchoolID = f)}
+                                onQueryChange={f => (this.callbackOnSchoolQueryChange = f)}
+                                />
                             <DebaterTableSearch
                                 season={this.state.season}
+                                schoolID={this.state.selectedSchoolID}
                                 setShowResults={f => (this.showTableSearchResults = f)}
                                 clearTableQuery={f => (this.clearTableQuery = f)}
                                 ref={this.refDebaterTableSearch}

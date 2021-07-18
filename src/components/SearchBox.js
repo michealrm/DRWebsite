@@ -20,6 +20,8 @@ export class SearchBox extends React.Component {
             selectedIndex: -1,
             showResults: false
         }
+
+        this.keyHandler = this.keyHandler.bind(this)
     }
 
     renderResults() {

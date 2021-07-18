@@ -8,6 +8,8 @@ export class SchoolSearch extends SearchBox {
     constructor(props) {
         super(props);
 
+        this.props.onQueryChange(this.onQueryChange)
+        this.props.onSelectedResult(this.selectedResult)
         this.props.setShowResults(this.setShowResults)
         this.props.clearQuery(this.clearQuery)
 
